@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from .models import User, Quizzz, Question, Choice, QuizResult
+from .models import User, Quiz, Question, Choice, QuizResult
 
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
@@ -67,7 +67,7 @@ class QuizSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Quizzz
+        model = Quiz
         fields = ['id', 'title', 'topic', 'difficulty_level', 'created_at', 'questions']
 
 

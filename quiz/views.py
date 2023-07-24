@@ -1,16 +1,16 @@
+from .models import User,Quiz
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from .serializers import RegisterSerializer, QuizSerializer, QuizResultSerializer,UserProfileSerializer
-from .models import User
+from rest_framework.permissions import IsAuthenticated,IsAdminUser,AllowAny
+from .serializers import RegisterSerializer,QuizSerializer,QuizResultSerializer,UserProfileSerializer
 from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Avg, Count
+from django.db.models import Avg,Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
 from rest_framework import status
-from .models import Quizzz, Choice, QuizResult, Question
+from .models import Choice,QuizResult,Question
 from .serializers import QuizTakingSerializer
 
 
@@ -90,8 +90,8 @@ class QuizTakingView(APIView):
 
     def get_quiz_object(self, pk):
         try:
-            return Quizzz.objects.get(pk=pk)
-        except Quizzz.DoesNotExist:
+            return Quiz.objects.get(pk=pk)
+        except Quiz.DoesNotExist:
             return None
 
 
@@ -139,7 +139,7 @@ class QuizResultView(APIView):
 
 
 class QuizListingView(generics.ListAPIView):
-    queryset = Quizzz.objects.all()
+    queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -148,14 +148,14 @@ class QuizListingView(generics.ListAPIView):
 
 
 class QuizFilterView(generics.ListAPIView):
-    queryset = Quizzz.objects.all()
+    queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
 
     def get_queryset(self):
         topic = self.request.query_params.get('topic')
         difficulty_level = self.request.query_params.get('difficulty_level')
         created_date = self.request.query_params.get('created_date')
-        queryset = Quizzz.objects.all()
+        queryset = Quiz.objects.all()
         if topic:
             queryset = queryset.filter(topic=topic)
         if difficulty_level:
@@ -167,7 +167,7 @@ class QuizFilterView(generics.ListAPIView):
 
 class QuizAnalyticsView(APIView):
     def get(self):
-        total_quizzes = Quizzz.objects.count()
+        total_quizzes = Quiz.objects.count()
         total_quiz_takers = QuizResult.objects.values('user').distinct().count()
         average_quiz_score = QuizResult.objects.aggregate(Avg('score'))['score__avg']
         quiz_scores = QuizResult.objects.values('quiz').annotate(average_score=Avg('score'))
@@ -219,7 +219,7 @@ class UserProfileView(generics.RetrieveAPIView):
     def get(self, request):
         user = request.user
         user_serializer = UserProfileSerializer(user)
-        quizzes_created = Quizzz.objects.filter(creator=user)
+        quizzes_created = Quiz.objects.filter(creator=user)
         quiz_serializer = QuizSerializer(quizzes_created, many=True)
         profile_data = {
             "user_info": user_serializer.data,
